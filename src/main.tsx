@@ -6,6 +6,7 @@ import App from "./App";
 import { ChakraProvider } from "@chakra-ui/react";
 import { theme } from "./theme";
 import "leaflet/dist/leaflet.css";
+import { FavoritesProvider } from "./context/FavoritesContext";
 
 ReactDOM.render(
   <React.StrictMode>
@@ -13,7 +14,9 @@ ReactDOM.render(
       {" "}
       {/* <-- Wrap App with the Router here */}
       <ChakraProvider theme={theme}>
-        <App />
+        <FavoritesProvider>
+          <App />
+        </FavoritesProvider>
       </ChakraProvider>
     </BrowserRouter>
   </React.StrictMode>,
