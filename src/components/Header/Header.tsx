@@ -2,7 +2,7 @@ import React from "react";
 // 1. Import Button from Chakra UI
 import { Box, Flex, Spacer, Text, Button } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
-import Logo from "../header_logo.png";
+import Logo from "../../header_logo.png";
 
 const Header: React.FC = () => {
   return (
