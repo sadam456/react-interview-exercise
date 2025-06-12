@@ -21,6 +21,7 @@ import {
   HStack,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
+import { MapComponent } from "@components/Map/MapComponent";
 import {
   IoArrowBack,
   IoSearch,
@@ -149,6 +150,14 @@ export const SchoolView: React.FC = () => {
               <strong>County:</strong> {district.NMCNTY15}
             </Text>
           </Box>
+          {!isLoading && schools.length > 0 && (
+            <Box mt={4}>
+              <MapComponent
+                schools={schools}
+                onMarkerClick={setSelectedSchool}
+              />
+            </Box>
+          )}
         </VStack>
       </GridItem>
 
