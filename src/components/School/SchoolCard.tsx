@@ -1,111 +1,101 @@
-import React, { useState } from "react";
+import React from "react";
 import {
-  Box,
   Heading,
   Text,
   VStack,
-  List,
-  ListItem,
   Divider,
   Icon,
+  Button,
+  IconButton, // <-- Import IconButton
 } from "@chakra-ui/react";
-import { motion } from "framer-motion";
 import { NCESSchoolFeatureAttributes } from "@utils/nces";
-import { IoSchool } from "react-icons/io5";
-
-const formatKey = (key: string) =>
-  key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
+import { IoSchool, IoBookmark, IoBookmarkOutline } from "react-icons/io5"; // <-- Import star icons
+import { useFavorites } from "src/context/FavoritesContext"; // <-- Import our hook
 
 interface SchoolCardProps {
   school: NCESSchoolFeatureAttributes;
+  onClick: () => void;
 }
 
-export const SchoolCard: React.FC<SchoolCardProps> = ({ school }) => {
-  const [isFlipped, setIsFlipped] = useState(false);
+export const SchoolCard: React.FC<SchoolCardProps> = ({ school, onClick }) => {
+  // 1. Get the school-specific functions from our context
+  const { isSchoolSaved, addSchool, removeSchool } = useFavorites();
+  const isSaved = isSchoolSaved(school.NCESSCH as string);
+
+  // 2. Create the click handler for the save icon
+  const handleSaveClick = (event: React.MouseEvent) => {
+    // This is crucial to stop the main onClick from firing
+    event.stopPropagation();
+
+    if (isSaved) {
+      removeSchool(school.NCESSCH as string);
+    } else {
+      addSchool(school);
+    }
+  };
 
   return (
-    <Box
-      perspective="1000px"
-      onClick={() => setIsFlipped(!isFlipped)}
-      cursor="pointer"
+    <VStack
+      onClick={onClick}
+      position="relative" // <-- Add position relative for the icon
+      spacing={3}
+      p={5}
+      borderWidth="1px"
+      borderRadius="lg"
+      boxShadow="sm"
+      bg="white"
+      _hover={{
+        boxShadow: "lg",
+        transform: "translateY(-2px)",
+        cursor: "pointer",
+      }}
+      transition="all 0.2s ease-in-out"
+      align="stretch"
+      height="100%"
     >
-      <motion.div
-        style={{
-          position: "relative",
-          width: "100%",
-          height: "250px",
-          transformStyle: "preserve-3d",
-        }}
-        animate={{ rotateY: isFlipped ? 180 : 0 }}
-        transition={{ duration: 0.6 }}
-      >
-        {/* Card Front */}
-        <VStack
-          as={motion.div}
-          p={5}
-          borderWidth="1px"
-          borderRadius="lg"
-          boxShadow="md"
-          bg="white"
-          spacing={3}
-          align="stretch"
-          height="100%"
-          justify="center"
-          sx={{
-            position: "absolute",
-            width: "100%",
-            height: "100%",
-            backfaceVisibility: "hidden",
-          }}
-        >
-          <Icon as={IoSchool as any} boxSize={8} color="blue.500" />
-          <VStack spacing={1} textAlign="center">
-            <Heading size="sm">{school.NAME}</Heading>
-            <Text fontSize="sm" color="gray.600">
-              {school.CITY}, {school.STATE}
-            </Text>
-          </VStack>
-          <Divider />
-          <Text fontSize="xs" color="blue.500" textAlign="center">
-            Click for details
-          </Text>
-        </VStack>
+      {/* 3. The new IconButton for saving schools */}
+      <IconButton
+        aria-label={
+          isSaved ? "Remove school from favorites" : "Save school to favorites"
+        }
+        icon={
+          <Icon
+            as={isSaved ? IoBookmark : (IoBookmarkOutline as any)}
+            color="black.400"
+          />
+        }
+        isRound
+        size="md"
+        variant="ghost"
+        onClick={handleSaveClick}
+        position="absolute"
+        top="8px"
+        right="8px"
+      />
 
-        {/* Card Back */}
-        <VStack
-          as={motion.div}
-          p={5}
-          borderWidth="1px"
-          borderRadius="lg"
-          boxShadow="md"
-          bg="gray.50"
-          spacing={2}
-          align="stretch"
-          height="100%"
-          overflowY="auto"
-          sx={{
-            position: "absolute",
-            width: "100%",
-            height: "100%",
-            backfaceVisibility: "hidden",
-            transform: "rotateY(180deg)",
-          }}
-        >
-          <Heading size="sm" mb={2}>
-            {school.NAME}
-          </Heading>
-          <List spacing={1} fontSize="xs">
-            {Object.entries(school).map(
-              ([key, value]) =>
-                value && (
-                  <ListItem key={key}>
-                    <strong>{formatKey(key)}:</strong> {value}
-                  </ListItem>
-                )
-            )}
-          </List>
-        </VStack>
-      </motion.div>
-    </Box>
+      <Icon
+        as={IoSchool as any}
+        boxSize={8}
+        color="blue.500"
+        alignSelf="center"
+        pt={4}
+      />
+      <VStack spacing={1} textAlign="center" flex={1} justify="center">
+        <Heading size="sm">{school.NAME}</Heading>
+        <Text fontSize="sm" color="gray.600">
+          {school.CITY}, {school.STATE}
+        </Text>
+      </VStack>
+      <Divider />
+      <Button
+        as="span"
+        variant="outline"
+        size="sm"
+        colorScheme="blue"
+        pointerEvents="none"
+      >
+        Click for details
+      </Button>
+    </VStack>
   );
 };
