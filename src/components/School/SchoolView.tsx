@@ -11,6 +11,7 @@ import {
   useToast,
   Icon,
 } from "@chakra-ui/react";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   NCESDistrictFeatureAttributes,
   NCESSchoolFeatureAttributes,
@@ -18,12 +19,7 @@ import {
 } from "@utils/nces";
 import { SchoolCard } from "./SchoolCard";
 
-interface SchoolViewProps {
-  district: NCESDistrictFeatureAttributes;
-  onBack: () => void;
-}
-
-export const SchoolView: React.FC<SchoolViewProps> = ({ district, onBack }) => {
+export const SchoolView: React.FC = () => {
   const [schools, setSchools] = useState<NCESSchoolFeatureAttributes[]>([]);
   const [filteredSchools, setFilteredSchools] = useState<
     NCESSchoolFeatureAttributes[]
@@ -31,6 +27,10 @@ export const SchoolView: React.FC<SchoolViewProps> = ({ district, onBack }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const toast = useToast();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const district = location.state?.district as NCESDistrictFeatureAttributes;
+  const onBack = () => navigate("/");
 
   useEffect(() => {
     setIsLoading(true);
@@ -56,7 +56,15 @@ export const SchoolView: React.FC<SchoolViewProps> = ({ district, onBack }) => {
       setFilteredSchools(filtered);
     }
   }, [searchQuery, schools]);
-
+  if (!district) {
+    return (
+      <VStack spacing={4} pt={20}>
+        <Heading>Error</Heading>
+        <Text>No district data found. Please go back to the homepage.</Text>
+        <Button onClick={onBack}>Go to Homepage</Button>
+      </VStack>
+    );
+  }
   return (
     <VStack spacing={6} align="stretch">
       <Button onClick={onBack}>Back to Districts</Button>
