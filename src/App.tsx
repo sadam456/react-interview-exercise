@@ -1,13 +1,22 @@
-import Header from '@components/Header'
-import Home from '@components/Home'
+import { Routes, Route } from "react-router-dom";
+import { Box } from "@chakra-ui/react"; // <-- Import Box
+import Header from "@components/Header/Header";
+import Home from "@components/Home";
+import { SchoolView } from "@components/School/SchoolView";
 
 function App() {
   return (
     <div className="App">
       <Header />
-      <Home />
+      {/* Create a main content container with padding */}
+      <Box as="main" pt="100px" px={{ base: "24px", md: "48px" }}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/district/:districtId" element={<SchoolView />} />
+        </Routes>
+      </Box>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

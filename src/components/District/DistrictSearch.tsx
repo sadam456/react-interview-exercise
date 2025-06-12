@@ -19,13 +19,8 @@ import {
 } from "@utils/nces";
 import { DistrictCard } from "./DistrictCard";
 
-interface DistrictSearchProps {
-  onDistrictSelect: (district: NCESDistrictFeatureAttributes) => void;
-}
-
-export const DistrictSearch: React.FC<DistrictSearchProps> = ({
-  onDistrictSelect,
-}) => {
+// No longer accepts any props
+export const DistrictSearch: React.FC = () => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<NCESDistrictFeatureAttributes[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -73,11 +68,7 @@ export const DistrictSearch: React.FC<DistrictSearchProps> = ({
       {results.length > 0 && !isLoading && (
         <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} spacing={6}>
           {results.map((district) => (
-            <DistrictCard
-              key={district.OBJECTID}
-              district={district}
-              onClick={() => onDistrictSelect(district)}
-            />
+            <DistrictCard key={district.OBJECTID} district={district} />
           ))}
         </SimpleGrid>
       )}
