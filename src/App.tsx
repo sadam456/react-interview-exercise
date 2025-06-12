@@ -3,6 +3,7 @@ import { Box } from "@chakra-ui/react"; // <-- Import Box
 import Header from "@components/Header/Header";
 import Home from "@components/Home";
 import { SchoolView } from "@components/School/SchoolView";
+import { FavoritesPage } from "@components/Favorites/FavoritesPage";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/district/:districtId" element={<SchoolView />} />
+          <Route path="/favorites" element={<FavoritesPage />} />
         </Routes>
       </Box>
     </div>
