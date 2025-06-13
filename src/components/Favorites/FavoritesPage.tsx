@@ -4,101 +4,89 @@ import {
   Heading,
   Text,
   VStack,
-  SimpleGrid, // <-- This is the key component we'll use
   Button,
-  Divider,
-  List,
-  ListItem,
-  ListIcon,
-  IconButton,
+  Container,
   Flex,
-  Spacer,
   Icon,
+  Badge,
 } from "@chakra-ui/react";
 import { useFavorites } from "src/context/FavoritesContext";
-import { DistrictCard } from "@components/District/DistrictCard";
 import { Link } from "react-router-dom";
-import { IoSchool, IoTrash, IoArrowBack } from "react-icons/io5";
+import { IoHeart, IoArrowBack } from "react-icons/io5";
+
+// Import our new, focused components
+import { EmptyFavoritesState } from "./EmptyFavoritesState";
+import { SavedDistrictsSection } from "./SavedDistrictsSection";
+import { OrphanSchoolsSection } from "./OrphanSchoolsSection";
 
 export const FavoritesPage: React.FC = () => {
   const { savedDistricts, savedSchools, removeSchool } = useFavorites();
-
   const savedDistrictIds = savedDistricts.map((d) => d.LEAID);
   const orphanSchools = savedSchools.filter(
     (s) => !savedDistrictIds.includes(s.LEAID as string)
   );
-
   const hasFavorites = savedDistricts.length > 0 || savedSchools.length > 0;
 
   return (
-    <VStack spacing={10} align="stretch">
-      <Flex align="center">
-        <Heading as="h1">My Favorites</Heading>
-        <Spacer />
-        {hasFavorites && (
-          <Button as={Link} to="/" leftIcon={<Icon as={IoArrowBack as any} />}>
-            Back to Search
-          </Button>
-        )}
-      </Flex>
+    <Box minHeight="100vh" bg="gray.20">
+      <Container maxWidth="1200px" py={12} px={6}>
+        <VStack spacing={12} align="stretch">
+          {/* Page Header Area */}
+          <Box textAlign="center" py={8}>
+            <Flex align="center" justify="center" mb={4}>
+              <Icon as={IoHeart as any} boxSize={10} color="green.500" mr={2} />
+              <Heading
+                as="h1"
+                fontSize={{ base: "3xl", md: "5xl" }}
+                bgGradient="linear(to-r, #2D7D32, #4CAF50, #66BB6A)"
+                bgClip="text"
+              >
+                My Favorites
+              </Heading>
+            </Flex>
+            <Text
+              fontSize={{ base: "lg", md: "xl" }}
+              color="gray.600"
+              maxW="600px"
+              mx="auto"
+            >
+              Your personalized collection of educational communities and
+              institutions
+            </Text>
+            {hasFavorites && (
+              <Button
+                as={Link}
+                to="/"
+                leftIcon={<Icon as={IoArrowBack as any} />}
+                size="lg"
+                mt={6}
+                colorScheme="green"
+                variant="outline"
+                borderRadius="full"
+              >
+                Back to Search
+              </Button>
+            )}
+          </Box>
 
-      {!hasFavorites && (
-        <VStack spacing={4} bg="white" p={10} borderRadius="lg" boxShadow="md">
-          <Text fontSize="lg">You haven't saved anything yet.</Text>
-          <Text color="gray.600">
-            Click the star icon on a district or school to add it to your
-            favorites.
-          </Text>
-          <Button as={Link} to="/" colorScheme="blue" mt={4}>
-            Find Districts
-          </Button>
-        </VStack>
-      )}
-
-      {savedDistricts.length > 0 && (
-        <VStack spacing={8} align="stretch">
-          <Heading as="h2" size="lg" borderBottomWidth="2px" pb={2}>
-            Saved Districts
-          </Heading>
-          <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing={6}>
-            {/* We just render the DistrictCard. It does the rest! */}
-            {savedDistricts.map((district) => (
-              <DistrictCard key={district.OBJECTID} district={district} />
-            ))}
-          </SimpleGrid>
-        </VStack>
-      )}
-
-      {/* The "Other Saved Schools" section remains at the bottom, as requested */}
-      {orphanSchools.length > 0 && (
-        <VStack spacing={4} align="stretch">
-          <Heading as="h2" size="lg" borderBottomWidth="2px" pb={2}>
-            Other Saved Schools
-          </Heading>
-          <List spacing={3} bg="white" p={5} borderRadius="lg" boxShadow="sm">
-            {orphanSchools.map((school) => (
-              <ListItem key={school.NCESSCH} display="flex" alignItems="center">
-                <ListIcon as={IoSchool as any} color="blue.500" />
-                <Box>
-                  <Text fontWeight="bold">{school.NAME}</Text>
-                  <Text fontSize="sm" color="gray.500">
-                    {school.CITY}, {school.STATE}
-                  </Text>
-                </Box>
-                <Spacer />
-                <IconButton
-                  aria-label="Remove school"
-                  icon={<Icon as={IoTrash as any} />}
-                  size="xs"
-                  colorScheme="red"
-                  variant="ghost"
-                  onClick={() => removeSchool(school.NCESSCH as string)}
+          {/* Conditional rendering is now much cleaner */}
+          {!hasFavorites ? (
+            <EmptyFavoritesState />
+          ) : (
+            <>
+              {savedDistricts.length > 0 && (
+                <SavedDistrictsSection districts={savedDistricts} />
+              )}
+              {orphanSchools.length > 0 && (
+                <OrphanSchoolsSection
+                  schools={orphanSchools}
+                  removeSchool={removeSchool}
                 />
-              </ListItem>
-            ))}
-          </List>
+              )}
+            </>
+          )}
         </VStack>
-      )}
-    </VStack>
+      </Container>
+    </Box>
   );
 };
