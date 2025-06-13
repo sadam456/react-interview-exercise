@@ -1,4 +1,3 @@
-import { useLocation, useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import {
   Box,
@@ -20,41 +19,53 @@ import {
   SimpleGrid,
   HStack,
 } from "@chakra-ui/react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { MapComponent } from "@components/Map/MapComponent";
-import {
-  IoArrowBack,
-  IoSearch,
-  IoReturnUpBack,
-  IoFilter,
-} from "react-icons/io5";
+import { IoArrowBack, IoSearch, IoReturnUpBack } from "react-icons/io5";
 import {
   NCESDistrictFeatureAttributes,
   NCESSchoolFeatureAttributes,
   searchSchools,
 } from "@utils/nces";
-import { SchoolCard } from "./SchoolCard"; // <-- Import our new SchoolCard
+import { SchoolCard } from "./SchoolCard";
+import { MapComponent } from "@components/Map/MapComponent";
 
+// Helper function to format API keys from the response into readable labels.
 const formatKey = (key: string) =>
   key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
 
 export const SchoolView: React.FC = () => {
+  // --- STATE AND HOOKS MANAGEMENT ---
+
+  // Hooks for routing and navigation
   const location = useLocation();
   const navigate = useNavigate();
+
+  // State for the fetched list of all schools in the district
   const [schools, setSchools] = useState<NCESSchoolFeatureAttributes[]>([]);
+  // State for the client-side filtered list of schools to display
   const [filteredSchools, setFilteredSchools] = useState<
     NCESSchoolFeatureAttributes[]
   >([]);
+  // State for the school name and city filter inputs
   const [searchQuery, setSearchQuery] = useState("");
+  const [cityFilter, setCityFilter] = useState("");
+  // State for loading and API status
   const [isLoading, setIsLoading] = useState(true);
+  const toast = useToast();
+
+  // State to manage the currently selected school for the detail view (which triggers the card flip)
   const [selectedSchool, setSelectedSchool] =
     useState<NCESSchoolFeatureAttributes | null>(null);
-  // 1. New state for the city filter
-  const [cityFilter, setCityFilter] = useState("");
-  const toast = useToast();
+
+  // Get the district data passed from the previous page via the Link state.
   const district = location.state?.district as NCESDistrictFeatureAttributes;
-  const onBack = () => navigate("/");
-  // Effect to fetch schools (no change)
+  const onBack = () => navigate(-1);
+
+  /**
+   * Effect to fetch all schools for the selected district when the component mounts
+   * or when the district itself changes.
+   */
   useEffect(() => {
     if (!district) return;
     setIsLoading(true);
@@ -75,30 +86,30 @@ export const SchoolView: React.FC = () => {
       .finally(() => setIsLoading(false));
   }, [district, toast]);
 
-  // 2. This useEffect now filters by BOTH name and city on the client-side for a fast UX.
+  /**
+   * Effect to perform fast, client-side filtering whenever the user types
+   * in the school name or city search inputs.
+   */
   useEffect(() => {
     const lowercasedNameQuery = searchQuery.toLowerCase();
     const lowercasedCityQuery = cityFilter.toLowerCase();
 
     const filtered = schools.filter((school) => {
-      // Check for name match (if name query exists)
       const nameMatch =
         !lowercasedNameQuery ||
         school.NAME?.toLowerCase().includes(lowercasedNameQuery);
-      // Check for city match (if city query exists)
       const cityMatch =
         !lowercasedCityQuery ||
         school.CITY?.toLowerCase().includes(lowercasedCityQuery);
-
       return nameMatch && cityMatch;
     });
     setFilteredSchools(filtered);
-  }, [searchQuery, cityFilter, schools]); // Re-run if any filter or the base school list changes
+  }, [searchQuery, cityFilter, schools]);
 
+  // Animation variants for the framer-motion component.
   const cardVariants = { front: { rotateY: 0 }, back: { rotateY: 180 } };
 
-  // If a user navigates directly to this URL without coming from a Link,
-  // the district data won't exist. We should handle this case.
+  // Guard clause to handle cases where a user navigates directly to this URL without district data.
   if (!district) {
     return (
       <VStack spacing={4} pt={20}>
@@ -113,14 +124,22 @@ export const SchoolView: React.FC = () => {
   }
 
   return (
+    // Main two-column layout for the page.
     <Grid
-      templateColumns={{ base: "1fr", lg: "repeat(3, 1fr)" }}
+      templateColumns={{ base: "1fr", lg: "repeat(20, 1fr)" }}
       gap={6}
       width="100%"
+      alignItems="stretch"
     >
-      {/* Left Column: District Info */}
-      <GridItem colSpan={1}>
-        <VStack spacing={4} align="stretch">
+      {/* --- Left Column: Displays static district info and the interactive map. --- */}
+      <GridItem colSpan={{ base: 1, lg: 9 }}>
+        <VStack
+          spacing={4}
+          align="stretch"
+          height="100%"
+          display="flex"
+          flexDirection="column"
+        >
           <Button
             onClick={onBack}
             leftIcon={<Icon as={IoArrowBack as any} />}
@@ -128,6 +147,7 @@ export const SchoolView: React.FC = () => {
           >
             All Districts
           </Button>
+          {/* Sticky box that shows the details of the currently selected district. */}
           <Box
             bg="blue.50"
             p={5}
@@ -136,6 +156,7 @@ export const SchoolView: React.FC = () => {
             borderColor="blue.200"
             position="sticky"
             top="100px"
+            width="80%"
           >
             <Heading as="h2" size="md">
               {district.NAME}
@@ -150,8 +171,9 @@ export const SchoolView: React.FC = () => {
               <strong>County:</strong> {district.NMCNTY15}
             </Text>
           </Box>
+          {/* Renders the Leaflet map with markers for all schools in the district. */}
           {!isLoading && schools.length > 0 && (
-            <Box mt={4}>
+            <Box mt={4} flex="1">
               <MapComponent
                 schools={schools}
                 onMarkerClick={setSelectedSchool}
@@ -161,20 +183,21 @@ export const SchoolView: React.FC = () => {
         </VStack>
       </GridItem>
 
-      {/* Right Column: The flippable card */}
-      <GridItem colSpan={{ base: 1, lg: 2 }}>
-        <Box perspective="1200px">
+      {/* --- Right Column: Contains the main interactive flippable card. --- */}
+      <GridItem colSpan={{ base: 1, lg: 11 }}>
+        <Box perspective="1200px" height="100%">
+          {/* This motion.div handles the card flip animation based on whether a school is selected. */}
           <motion.div
             style={{
               position: "relative",
               transformStyle: "preserve-3d",
-              minHeight: "70vh",
+              height: "100%",
             }}
             variants={cardVariants}
             animate={selectedSchool ? "back" : "front"}
             transition={{ duration: 0.7 }}
           >
-            {/* Front of the Card: Search and Grid of SchoolCards */}
+            {/* --- Front of Card: School Search and Results Grid --- */}
             <VStack
               as={motion.div}
               spacing={4}
@@ -191,7 +214,6 @@ export const SchoolView: React.FC = () => {
                 height: "100%",
               }}
             >
-              {/* 3. New UI with both search inputs */}
               <HStack>
                 <InputGroup size="lg">
                   <InputLeftElement pointerEvents="none" color="gray.400">
@@ -205,18 +227,14 @@ export const SchoolView: React.FC = () => {
                     disabled={isLoading}
                   />
                 </InputGroup>
-                <InputGroup>
-                  <InputLeftElement>
-                    <Icon as={IoFilter as any} />
-                  </InputLeftElement>
-                  <Input
-                    placeholder="Filter by City..."
-                    value={cityFilter}
-                    onChange={(e) => setCityFilter(e.target.value)}
-                    variant="filled"
-                    disabled={isLoading}
-                  />
-                </InputGroup>
+                <Input
+                  size="lg"
+                  placeholder="Filter by City..."
+                  value={cityFilter}
+                  onChange={(e) => setCityFilter(e.target.value)}
+                  variant="filled"
+                  disabled={isLoading}
+                />
               </HStack>
               {isLoading ? (
                 <Box
@@ -231,20 +249,32 @@ export const SchoolView: React.FC = () => {
                 </Box>
               ) : (
                 <Box overflowY="auto" flex={1}>
-                  <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
-                    {filteredSchools.map((school) => (
-                      <SchoolCard
-                        key={school.NCESSCH}
-                        school={school}
-                        onClick={() => setSelectedSchool(school)}
-                      />
-                    ))}
-                  </SimpleGrid>
+                  {/*Conditional logic for empty results === */}
+                  {filteredSchools.length > 0 ? (
+                    <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
+                      {filteredSchools.map((school) => (
+                        <SchoolCard
+                          key={school.NCESSCH}
+                          school={school}
+                          onClick={() => setSelectedSchool(school)}
+                        />
+                      ))}
+                    </SimpleGrid>
+                  ) : (
+                    <VStack spacing={3} p={10} flex={1} justifyContent="center">
+                      <Heading as="h3" size="md">
+                        No Schools Found
+                      </Heading>
+                      <Text color="gray.600">
+                        No schools match your current filter criteria.
+                      </Text>
+                    </VStack>
+                  )}
                 </Box>
               )}
             </VStack>
 
-            {/* Back of the Card: School Details */}
+            {/* --- Back of Card: Detailed information for the selected school --- */}
             <VStack
               as={motion.div}
               spacing={4}
