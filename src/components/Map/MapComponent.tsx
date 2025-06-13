@@ -1,6 +1,6 @@
 import React from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import { Box, Text } from "@chakra-ui/react"; // <-- Import Text
+import { Box, Text } from "@chakra-ui/react";
 import { NCESSchoolFeatureAttributes } from "@utils/nces";
 import { Icon } from "leaflet";
 
@@ -20,7 +20,6 @@ const containerStyle = {
   borderRadius: "0.5rem",
 };
 
-// 1. Add the new onMarkerClick prop
 interface MapComponentProps {
   schools: NCESSchoolFeatureAttributes[];
   onMarkerClick: (school: NCESSchoolFeatureAttributes) => void;
@@ -30,25 +29,41 @@ export const MapComponent: React.FC<MapComponentProps> = ({
   schools,
   onMarkerClick,
 }) => {
-  // ... mapCenter calculation logic remains the same ...
   const mapCenter = React.useMemo(() => {
-    if (schools.length === 0) return { lat: 39.8283, lng: -98.5795 };
+    if (schools.length === 0) {
+      // Default center of the US
+      return { lat: 39.8283, lng: -98.5795 };
+    }
     const validSchools = schools.filter((s) => s.LAT && s.LON);
     if (validSchools.length === 0) return { lat: 39.8283, lng: -98.5795 };
+
     const avgLat =
       validSchools.reduce((sum, school) => sum + school.LAT!, 0) /
       validSchools.length;
     const avgLng =
       validSchools.reduce((sum, school) => sum + school.LON!, 0) /
       validSchools.length;
+
     return { lat: avgLat, lng: avgLng };
+  }, [schools]);
+
+  // Determine the zoom level dynamically
+  const mapZoom = React.useMemo(() => {
+    if (schools.length === 0) {
+      return 4; // Zoom out to show the whole US
+    }
+    if (schools.length === 1) {
+      return 13; // Zoom in close for a single school
+    }
+    return 10; // A good regional zoom for multiple schools
   }, [schools]);
 
   return (
     <Box sx={{ ".leaflet-container": { borderRadius: "lg" } }}>
+      {/* dynamic zoom level */}
       <MapContainer
         center={[mapCenter.lat, mapCenter.lng]}
-        zoom={10}
+        zoom={mapZoom}
         style={containerStyle}
       >
         <TileLayer
@@ -66,7 +81,6 @@ export const MapComponent: React.FC<MapComponentProps> = ({
                 icon={defaultIcon}
               >
                 <Popup>
-                  {/* 2. Make the popup content a clickable Text component */}
                   <Text
                     onClick={() => onMarkerClick(school)}
                     cursor="pointer"
