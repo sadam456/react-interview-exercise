@@ -185,7 +185,7 @@ export const SchoolView: React.FC = () => {
 
       {/* --- Right Column: Contains the main interactive flippable card. --- */}
       <GridItem colSpan={{ base: 1, lg: 11 }}>
-        <Box perspective="1200px" height="100%">
+        <Box sx={{ perspective: "1200px" }} height="100%">
           {/* This motion.div handles the card flip animation based on whether a school is selected. */}
           <motion.div
             style={{
