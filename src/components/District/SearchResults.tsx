@@ -72,11 +72,37 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
         <Text fontSize="lg" fontWeight="600" color="gray.700" mb={6} px={2}>
           Found {results.length} district{results.length !== 1 ? "s" : ""}
         </Text>
-        <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6} p={2}>
-          {results.map((district) => (
-            <DistrictCard key={district.OBJECTID} district={district} />
-          ))}
-        </SimpleGrid>
+        <Box
+          overflowY="auto"
+          maxHeight="70vh"
+          css={{
+            "&::-webkit-scrollbar": {
+              width: "8px",
+            },
+
+            "&::-webkit-scrollbar-track": {
+              background: "#F7FAFC",
+
+              borderRadius: "4px",
+            },
+
+            "&::-webkit-scrollbar-thumb": {
+              background: "#CBD5E0",
+
+              borderRadius: "4px",
+            },
+
+            "&::-webkit-scrollbar-thumb:hover": {
+              background: "#A0AEC0",
+            },
+          }}
+        >
+          <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6} p={2}>
+            {results.map((district) => (
+              <DistrictCard key={district.OBJECTID} district={district} />
+            ))}
+          </SimpleGrid>
+        </Box>
       </Box>
     );
   }
