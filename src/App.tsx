@@ -9,7 +9,8 @@ import { theme } from "@theme/index";
 
 function App() {
   return (
-    <Box display="flex" flexDirection="column" minH="100vh">
+    <Box position="relative" bg="#f4f6f8">
+      {/*The Animated Background --- */}
       <Box
         overflow="hidden"
         className="globParent"
@@ -17,6 +18,7 @@ function App() {
         width="100vw"
         height="100%"
         minHeight="100vh"
+        zIndex={0}
       >
         <Glob
           size={["60%", "60%"]}
@@ -38,13 +40,22 @@ function App() {
           color={theme.colors.brand.green}
         />
       </Box>
-      <Header />
-      <Box as="main" pt="100px" px={{ base: "24px", md: "48px" }} flex="1">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/district/:districtId" element={<SchoolView />} />
-          <Route path="/favorites" element={<FavoritesPage />} />
-        </Routes>
+      {/*All Application Content --- */}
+      <Box
+        position="relative"
+        zIndex={1}
+        display="flex"
+        flexDirection="column"
+        minH="100vh"
+      >
+        <Header />
+        <Box as="main" pt="100px" px={{ base: "24px", md: "48px" }} flex="1">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/district/:districtId" element={<SchoolView />} />
+            <Route path="/favorites" element={<FavoritesPage />} />
+          </Routes>
+        </Box>
       </Box>
     </Box>
   );
