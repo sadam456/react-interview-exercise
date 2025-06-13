@@ -1,5 +1,4 @@
 import React from "react";
-// 1. Import Button from Chakra UI
 import { Box, Flex, Spacer, Text, Button } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import Logo from "../../header_logo.png";
@@ -31,28 +30,74 @@ const Header: React.FC = () => {
           </a>
         </Box>
         <Spacer />
-
-        {/* === UPDATED LINK === */}
+        <Button
+          as={Link}
+          to="/"
+          variant="ghost"
+          lineHeight="1.55"
+          borderRadius="4px"
+          fontSize="18px"
+          fontWeight="semibold"
+          color="#000000"
+          fontFamily="Archivo, sans-serif"
+          p="0.5em 0.7em"
+          _hover={{
+            bg: "green.100",
+            textDecoration: "none",
+            outline: "none",
+          }}
+          _focus={{
+            outline: "none",
+            boxShadow: "none",
+          }}
+        >
+          Resources
+        </Button>
         <Button
           as={Link}
           to="/favorites"
-          // Use the 'ghost' variant to remove default button background/borders
           variant="ghost"
-          // Apply styles from the original website
           lineHeight="1.55"
           borderRadius="4px"
-          fontSize="17px"
-          fontWeight="normal" // This is equivalent to font-weight: 400
-          color="gray.800"
-          fontFamily="Archivo, sans-serif" // See note on fonts below
+          fontSize="18px"
+          fontWeight="semibold"
+          color="#000000"
+          fontFamily="Archivo, sans-serif"
           p="0.5em 0.7em"
-          // Remove default button hover effects and add the new one
           _hover={{
-            bg: "green.100", // This creates the "box with light greenish color"
+            bg: "green.100",
             textDecoration: "none",
+            outline: "none",
+          }}
+          _focus={{
+            outline: "none",
+            boxShadow: "none",
           }}
         >
           My Favorites
+        </Button>
+        <Button
+          as={Link}
+          to="/"
+          variant="ghost"
+          lineHeight="1.55"
+          borderRadius="4px"
+          fontSize="18px"
+          fontWeight="semibold"
+          color="#000000"
+          fontFamily="Archivo, sans-serif"
+          p="0.5em 0.7em"
+          _hover={{
+            bg: "green.100",
+            textDecoration: "none",
+            outline: "none",
+          }}
+          _focus={{
+            outline: "none",
+            boxShadow: "none",
+          }}
+        >
+          Login
         </Button>
       </Flex>
     </Box>
