@@ -1,24 +1,59 @@
-name: Build and Deploy
-on: 
+# Name of the workflow displayed on the GitHub Actions tab
+name: Build and Deploy to GitHub Pages
+
+# Controls when the action will run
+on:
+  # Runs on pushes to the main branch
   push:
-    branches:
-      - main
+    branches: ["main"]
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Sets permissions for the GITHUB_TOKEN to allow deployment
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment and cancel older runs
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+# Define the single job for deployment
 jobs:
-  build-and-deploy:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout 🛎️
-        uses: actions/checkout@v2.3.1
-      - uses: actions/setup-node@v2
-        with:
-          node-version: 16.x
-      - name: Install and Build 🔧 
-        run: |
-          npm install
-          npm run build
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@4.1.5
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          branch: gh-pages # The branch the action should deploy to.
-          folder: dist # The folder the action should deploy.
+          node-version: "20" # Using a modern, stable version of Node
+          cache: "npm"
+
+      - name: Install dependencies
+        # 'npm ci' is recommended for CI for faster, more reliable installs
+        run: npm ci
+
+      - name: Build project
+        # This command runs the "build" script in your package.json
+        run: npm run build
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload build artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Upload the 'dist' folder, which is Vite's default build output directory
+          path: "./dist"
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
