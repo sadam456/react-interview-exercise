@@ -6,11 +6,11 @@ import {
   Divider,
   Icon,
   Button,
-  IconButton, // <-- Import IconButton
+  IconButton,
 } from "@chakra-ui/react";
 import { NCESSchoolFeatureAttributes } from "@utils/nces";
-import { IoSchool, IoBookmark, IoBookmarkOutline } from "react-icons/io5"; // <-- Import star icons
-import { useFavorites } from "src/context/FavoritesContext"; // <-- Import our hook
+import { IoSchool, IoBookmark, IoBookmarkOutline } from "react-icons/io5";
+import { useFavorites } from "src/context/FavoritesContext";
 
 interface SchoolCardProps {
   school: NCESSchoolFeatureAttributes;
@@ -18,13 +18,16 @@ interface SchoolCardProps {
 }
 
 export const SchoolCard: React.FC<SchoolCardProps> = ({ school, onClick }) => {
-  // 1. Get the school-specific functions from our context
+  // --- STATE AND CONTEXT HOOKS ---
+  // Fetches favorites context to manage this school's saved state.
   const { isSchoolSaved, addSchool, removeSchool } = useFavorites();
   const isSaved = isSchoolSaved(school.NCESSCH as string);
 
-  // 2. Create the click handler for the save icon
+  /**
+   * Click handler for the save icon.
+   * `event.stopPropagation()` is crucial here to prevent the card's main onClick from firing.
+   */
   const handleSaveClick = (event: React.MouseEvent) => {
-    // This is crucial to stop the main onClick from firing
     event.stopPropagation();
 
     if (isSaved) {
@@ -35,9 +38,10 @@ export const SchoolCard: React.FC<SchoolCardProps> = ({ school, onClick }) => {
   };
 
   return (
+    // The entire card is clickable to trigger the view flip in the parent component.
     <VStack
       onClick={onClick}
-      position="relative" // <-- Add position relative for the icon
+      position="relative"
       spacing={3}
       p={5}
       borderWidth="1px"
@@ -53,7 +57,7 @@ export const SchoolCard: React.FC<SchoolCardProps> = ({ school, onClick }) => {
       align="stretch"
       height="100%"
     >
-      {/* 3. The new IconButton for saving schools */}
+      {/* Save/favorite icon button, positioned in the top-right corner. */}
       <IconButton
         aria-label={
           isSaved ? "Remove school from favorites" : "Save school to favorites"
@@ -65,14 +69,19 @@ export const SchoolCard: React.FC<SchoolCardProps> = ({ school, onClick }) => {
           />
         }
         isRound
-        size="md"
+        size="sm"
         variant="ghost"
         onClick={handleSaveClick}
         position="absolute"
         top="8px"
         right="8px"
+        _focus={{
+          outline: "none",
+          boxShadow: "none",
+        }}
       />
 
+      {/* Main content section with school icon, name, and location. */}
       <Icon
         as={IoSchool as any}
         boxSize={8}

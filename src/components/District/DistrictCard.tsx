@@ -29,6 +29,8 @@ interface DistrictCardProps {
 }
 
 export const DistrictCard: React.FC<DistrictCardProps> = ({ district }) => {
+  // --- STATE AND CONTEXT HOOKS ---
+  // Fetches global favorites state to manage this district's saved status and its schools.
   const {
     isDistrictSaved,
     addDistrict,
@@ -36,18 +38,23 @@ export const DistrictCard: React.FC<DistrictCardProps> = ({ district }) => {
     savedSchools,
     removeSchool,
   } = useFavorites();
-
+  // Fetches router location to determine which page the card is on.
   const location = useLocation();
-  const isSaved = isDistrictSaved(district.LEAID);
 
-  // Find the schools that belong to THIS district card
+  // --- DERIVED STATE & LOGIC ---
+  // Check if the current district is in the user's favorites.
+  const isSaved = isDistrictSaved(district.LEAID);
+  // Filter the global list of saved schools to find ones that belong to this district.
   const schoolsInThisDistrict = savedSchools.filter(
     (school) => school.LEAID === district.LEAID
   );
-
-  // Decide whether to show the list based on the current page path
+  // Logic to determine if the detailed view (with saved schools) should be shown.
   const shouldShowSchools = location.pathname === "/favorites";
 
+  /*
+   * Click handler for the save/favorite icon.
+   * Calls `event.preventDefault()` to stop the parent Link from navigating.
+   */
   const handleSaveClick = (event: React.MouseEvent) => {
     event.preventDefault();
     if (isSaved) {
@@ -58,12 +65,14 @@ export const DistrictCard: React.FC<DistrictCardProps> = ({ district }) => {
   };
 
   return (
+    // The entire card is a Link component from React Router for navigation.
     <Box
       as={Link}
       to={`/district/${district.LEAID}`}
       state={{ district }}
       _hover={{ textDecoration: "none" }}
     >
+      {/* Main layout container for the card's content. */}
       <VStack
         position="relative"
         spacing={3}
@@ -81,6 +90,7 @@ export const DistrictCard: React.FC<DistrictCardProps> = ({ district }) => {
         height="100%"
         cursor="pointer"
       >
+        {/* Save/Favorite icon button, positioned absolutely in the top-right corner. */}
         <IconButton
           aria-label={isSaved ? "Remove from favorites" : "Save to favorites"}
           icon={
@@ -90,14 +100,19 @@ export const DistrictCard: React.FC<DistrictCardProps> = ({ district }) => {
             />
           }
           isRound
-          size="sm"
+          size="md"
           variant="ghost"
           onClick={handleSaveClick}
           position="absolute"
           top="8px"
           right="8px"
+          _focus={{
+            outline: "none",
+            boxShadow: "none",
+          }}
         />
 
+        {/* Main content: Icon, District Name, and Location. */}
         <Icon
           as={IoBusiness as any}
           boxSize={8}
@@ -112,6 +127,7 @@ export const DistrictCard: React.FC<DistrictCardProps> = ({ district }) => {
           </Text>
         </VStack>
         <Divider />
+        {/* Call-to-action button at the bottom of the card. */}
         <Button
           as="span"
           variant="outline"
@@ -122,8 +138,7 @@ export const DistrictCard: React.FC<DistrictCardProps> = ({ district }) => {
         >
           Select this district
         </Button>
-
-        {/* Conditionally render the list of saved schools only on the favorites page */}
+        {/* Conditional section to display saved schools, only visible on the favorites page. */}
         {shouldShowSchools && schoolsInThisDistrict.length > 0 && (
           <VStack align="stretch" pt={3} mt={3} borderTopWidth="1px">
             <Heading as="h4" size="xs" textAlign="left">
