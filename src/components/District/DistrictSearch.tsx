@@ -1,30 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
-import {
-  Box,
-  Text,
-  Input,
-  VStack,
-  Spinner,
-  useToast,
-  InputGroup,
-  InputLeftElement,
-  SimpleGrid,
-  Icon,
-  HStack,
-  List,
-  ListItem,
-  Heading,
-} from "@chakra-ui/react";
-import { Select } from "chakra-react-select";
+import { Box, VStack, useToast } from "@chakra-ui/react";
 import { useSearchParams } from "react-router-dom";
-import { IoSearch, IoTimeOutline } from "react-icons/io5";
 import {
   searchSchoolDistricts,
   NCESDistrictFeatureAttributes,
 } from "@utils/nces";
-import { DistrictCard } from "./DistrictCard";
 import { usStates } from "src/data/states";
 import { useLocalStorage } from "src/hooks/useLocalStorage";
+import { SearchPageHeader } from "./SearchPageHeader";
+import { SearchControls } from "./SearchControls";
+import { SearchResults } from "./SearchResults";
 
 // Formats the states data for the react-select component
 const stateOptions = usStates.map((state) => ({
@@ -135,137 +120,36 @@ export const DistrictSearch: React.FC = () => {
   }, [searchParams, toast]); // Dependency on searchParams ensures this runs when the URL changes.
 
   return (
-    <VStack spacing={6} align="stretch" maxWidth="1000px" margin="0 auto">
-      {/* Page Header */}
-      <Box textAlign="center">
-        <Text as="h1" fontSize="4xl" fontWeight="bold" lineHeight="tight">
-          School District Finder
-        </Text>
-        <Text fontSize="lg" color="gray.600">
-          Search by name and/or filter by location.
-        </Text>
-      </Box>
-
-      {/* Search and Filter Controls */}
+    <Box minHeight="100vh" bg="gray.20">
       <VStack
-        position="relative"
-        spacing={4}
-        bg="white"
-        p={6}
-        borderRadius="lg"
-        boxShadow="sm"
+        spacing={8}
+        align="stretch"
+        maxWidth="1200px"
+        margin="0 auto"
+        py={8}
+        px={6}
       >
-        <Box position="relative" width="100%">
-          <InputGroup size="lg">
-            <InputLeftElement pointerEvents="none">
-              <Icon as={IoSearch as any} color="gray.400" />
-            </InputLeftElement>
-            <Input
-              ref={inputRef}
-              onKeyDown={handleKeyDown}
-              placeholder="Search by District Name..."
-              value={nameQuery}
-              onChange={(e) => setNameQuery(e.target.value)}
-              variant="filled"
-              onFocus={() => setIsHistoryVisible(true)}
-              onBlur={() => {
-                setTimeout(() => {
-                  setIsHistoryVisible(false);
-                }, 150);
-              }}
-            />
-          </InputGroup>
-          {/* Search History Dropdown */}
-          {isHistoryVisible && searchHistory.length > 0 && (
-            <Box
-              position="absolute"
-              top="100%"
-              mt={2}
-              bg="white"
-              width="100%"
-              boxShadow="lg"
-              borderRadius="md"
-              zIndex="dropdown"
-              p={2}
-            >
-              <List spacing={1}>
-                {searchHistory.map((item, index) => (
-                  <ListItem
-                    key={index}
-                    onClick={() => {
-                      setNameQuery(item);
-                      setIsHistoryVisible(false);
-                    }}
-                    p={2}
-                    borderRadius="md"
-                    _hover={{ bg: "gray.100", cursor: "pointer" }}
-                    display="flex"
-                    alignItems="center"
-                  >
-                    <Icon as={IoTimeOutline as any} mr={2} color="gray.500" />
-                    {item}
-                  </ListItem>
-                ))}
-              </List>
-            </Box>
-          )}
-        </Box>
-        {/* City and State Filters */}
-        <HStack width="100%">
-          <Input
-            placeholder="Filter by City..."
-            value={cityQuery}
-            onChange={(e) => setCityQuery(e.target.value)}
-          />
-          <Select
-            name="state-select"
-            options={stateOptions}
-            placeholder="Filter by State"
-            isClearable
-            value={
-              stateOptions.find((option) => option.value === selectedState) ||
-              null
-            }
-            onChange={(selectedOption) => {
-              setSelectedState(selectedOption ? selectedOption.value : null);
-            }}
-            chakraStyles={{
-              container: (provided) => ({ ...provided, width: "100%" }),
-            }}
-          />
-        </HStack>
+        <SearchPageHeader />
+        <SearchControls
+          nameQuery={nameQuery}
+          setNameQuery={setNameQuery}
+          cityQuery={cityQuery}
+          setCityQuery={setCityQuery}
+          selectedState={selectedState}
+          setSelectedState={setSelectedState}
+          searchHistory={searchHistory}
+          isHistoryVisible={isHistoryVisible}
+          setIsHistoryVisible={setIsHistoryVisible}
+          inputRef={inputRef}
+          handleKeyDown={handleKeyDown}
+          stateOptions={stateOptions}
+        />
+        <SearchResults
+          isLoading={isLoading}
+          results={results}
+          hasAttemptedSearch={!!(nameQuery || cityQuery || selectedState)}
+        />
       </VStack>
-
-      {/*"No Results" message*/}
-      {!isLoading &&
-        results.length === 0 &&
-        (nameQuery || cityQuery || selectedState) && (
-          <VStack spacing={3} bg="gray.50" p={10} borderRadius="lg">
-            <Heading as="h3" size="md">
-              No Districts Found
-            </Heading>
-            <Text color="gray.600">
-              Please try adjusting your search terms or filters.
-            </Text>
-          </VStack>
-        )}
-
-      {/* Loading and Results Display */}
-      {isLoading && (
-        <Box textAlign="center" paddingY={10}>
-          <Spinner size="xl" />
-        </Box>
-      )}
-
-      {results.length > 0 && !isLoading && (
-        <Box overflowY="auto" maxHeight="60vh" p={1}>
-          <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} spacing={6}>
-            {results.map((district) => (
-              <DistrictCard key={district.OBJECTID} district={district} />
-            ))}
-          </SimpleGrid>
-        </Box>
-      )}
-    </VStack>
+    </Box>
   );
 };
