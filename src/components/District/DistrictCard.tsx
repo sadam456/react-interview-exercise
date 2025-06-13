@@ -12,6 +12,7 @@ import {
   ListItem,
   ListIcon,
   Spacer,
+  Flex,
 } from "@chakra-ui/react";
 import { NCESDistrictFeatureAttributes } from "@utils/nces";
 import {
@@ -20,9 +21,13 @@ import {
   IoBookmarkOutline,
   IoSchool,
   IoTrash,
+  IoCheckmarkDone,
+  IoCheckmarkCircle,
+  IoCheckmarkCircleOutline,
 } from "react-icons/io5";
 import { Link, useLocation } from "react-router-dom";
 import { useFavorites } from "src/context/FavoritesContext";
+import { useReviewedItems } from "src/context/ReviewedItemsContext";
 
 interface DistrictCardProps {
   district: NCESDistrictFeatureAttributes;
@@ -42,8 +47,12 @@ export const DistrictCard: React.FC<DistrictCardProps> = ({ district }) => {
   const location = useLocation();
 
   // --- DERIVED STATE & LOGIC ---
-  // Check if the current district is in the user's favorites.
+  // State to store the review status.
+  const { isDistrictReviewed, toggleDistrictReviewed } = useReviewedItems();
+  // Check if the current district is in the user's favorites/Reviewed.
   const isSaved = isDistrictSaved(district.LEAID);
+  const isReviewed = isDistrictReviewed(district.LEAID);
+
   // Filter the global list of saved schools to find ones that belong to this district.
   const schoolsInThisDistrict = savedSchools.filter(
     (school) => school.LEAID === district.LEAID
@@ -62,6 +71,11 @@ export const DistrictCard: React.FC<DistrictCardProps> = ({ district }) => {
     } else {
       addDistrict(district);
     }
+  };
+
+  const handleReviewedClick = (event: React.MouseEvent) => {
+    event.preventDefault();
+    toggleDistrictReviewed(district.LEAID);
   };
 
   return (
@@ -111,7 +125,6 @@ export const DistrictCard: React.FC<DistrictCardProps> = ({ district }) => {
             boxShadow: "none",
           }}
         />
-
         {/* Main content: Icon, District Name, and Location. */}
         <Icon
           as={IoBusiness as any}
@@ -127,17 +140,36 @@ export const DistrictCard: React.FC<DistrictCardProps> = ({ district }) => {
           </Text>
         </VStack>
         <Divider />
-        {/* Call-to-action button at the bottom of the card. */}
-        <Button
-          as="span"
-          variant="outline"
-          size="sm"
-          colorScheme="blue"
-          pointerEvents="none"
-          alignSelf="center"
-        >
-          Select this district
-        </Button>
+        <Flex justify="space-between" align="center" gap={2}>
+          {/* This is our new button for marking as reviewed */}
+          <Button
+            size="sm"
+            variant={isReviewed ? "solid" : "outline"}
+            colorScheme="green"
+            leftIcon={<Icon as={IoCheckmarkDone as any} />}
+            onClick={handleReviewedClick}
+            _focus={{
+              outline: "none",
+              boxShadow: "none",
+            }}
+          >
+            {isReviewed ? "Reviewed" : "Mark as viewed"}
+          </Button>
+          <Button
+            as="span"
+            variant="outline"
+            size="sm"
+            colorScheme="blue"
+            pointerEvents="none"
+            alignSelf="center"
+            _focus={{
+              outline: "none",
+              boxShadow: "none",
+            }}
+          >
+            Select this district
+          </Button>
+        </Flex>
         {/* Conditional section to display saved schools, only visible on the favorites page. */}
         {shouldShowSchools && schoolsInThisDistrict.length > 0 && (
           <VStack align="stretch" pt={3} mt={3} borderTopWidth="1px">

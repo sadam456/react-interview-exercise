@@ -7,10 +7,17 @@ import {
   Icon,
   Button,
   IconButton,
+  Flex,
 } from "@chakra-ui/react";
 import { NCESSchoolFeatureAttributes } from "@utils/nces";
-import { IoSchool, IoBookmark, IoBookmarkOutline } from "react-icons/io5";
+import {
+  IoSchool,
+  IoBookmark,
+  IoBookmarkOutline,
+  IoCheckmarkDone,
+} from "react-icons/io5";
 import { useFavorites } from "src/context/FavoritesContext";
+import { useReviewedItems } from "src/context/ReviewedItemsContext";
 
 interface SchoolCardProps {
   school: NCESSchoolFeatureAttributes;
@@ -19,9 +26,11 @@ interface SchoolCardProps {
 
 export const SchoolCard: React.FC<SchoolCardProps> = ({ school, onClick }) => {
   // --- STATE AND CONTEXT HOOKS ---
-  // Fetches favorites context to manage this school's saved state.
+  // Fetches favorites context to manage this school's saved state/Reviewed state.
   const { isSchoolSaved, addSchool, removeSchool } = useFavorites();
+  const { isSchoolReviewed, toggleSchoolReviewed } = useReviewedItems();
   const isSaved = isSchoolSaved(school.NCESSCH as string);
+  const isReviewed = isSchoolReviewed(school.NCESSCH as string);
 
   /**
    * Click handler for the save icon.
@@ -35,6 +44,11 @@ export const SchoolCard: React.FC<SchoolCardProps> = ({ school, onClick }) => {
     } else {
       addSchool(school);
     }
+  };
+
+  const handleReviewedClick = (event: React.MouseEvent) => {
+    event.preventDefault();
+    toggleSchoolReviewed(school.NCESSCH as string);
   };
 
   return (
@@ -80,7 +94,6 @@ export const SchoolCard: React.FC<SchoolCardProps> = ({ school, onClick }) => {
           boxShadow: "none",
         }}
       />
-
       {/* Main content section with school icon, name, and location. */}
       <Icon
         as={IoSchool as any}
@@ -96,15 +109,35 @@ export const SchoolCard: React.FC<SchoolCardProps> = ({ school, onClick }) => {
         </Text>
       </VStack>
       <Divider />
-      <Button
-        as="span"
-        variant="outline"
-        size="sm"
-        colorScheme="blue"
-        pointerEvents="none"
-      >
-        Click for details
-      </Button>
+      <Flex justify="space-between" align="center">
+        {/* This is our new button for marking as reviewed */}
+        <Button
+          size="sm"
+          variant={isReviewed ? "solid" : "outline"}
+          colorScheme="green"
+          leftIcon={<Icon as={IoCheckmarkDone as any} />}
+          onClick={handleReviewedClick}
+          _focus={{
+            outline: "none",
+            boxShadow: "none",
+          }}
+        >
+          {isReviewed ? "Reviewed" : "Mark as viewed"}
+        </Button>
+        <Button
+          as="span"
+          variant="outline"
+          size="sm"
+          colorScheme="blue"
+          pointerEvents="none"
+          _focus={{
+            outline: "none",
+            boxShadow: "none",
+          }}
+        >
+          Click for details
+        </Button>
+      </Flex>
     </VStack>
   );
 };
