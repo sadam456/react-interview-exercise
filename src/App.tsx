@@ -16,7 +16,7 @@ function App() {
         className="globParent"
         position="absolute"
         width="100vw"
-        height="100%"
+        height="80%"
         minHeight="100vh"
         zIndex={0}
       >
