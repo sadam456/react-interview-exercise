@@ -15,7 +15,7 @@ import {
   Flex,
 } from "@chakra-ui/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { IoSearch, IoSchoolOutline } from "react-icons/io5";
+import { IoSearch, IoSchoolOutline, IoFilter } from "react-icons/io5";
 import { SchoolCard } from "./SchoolCard";
 import { NCESSchoolFeatureAttributes } from "@utils/nces";
 import { searchVariants, glowVariants } from "../design/AnimationVariants";
@@ -89,16 +89,21 @@ export const SchoolSearchGrid: React.FC<SchoolSearchGridProps> = ({
             </InputGroup>
           </motion.div>
           <motion.div style={{ flex: 1 }} whileHover={{ scale: 1.02 }}>
-            <Input
-              size="lg"
-              placeholder="Filter by City..."
-              value={cityFilter}
-              onChange={(e) => setCityFilter(e.target.value)}
-              variant="filled"
-              disabled={isLoading}
-              borderRadius="xl"
-              bg="gray.50"
-            />
+            <InputGroup size="lg">
+              <InputLeftElement>
+                <Icon as={IoFilter as any} />
+              </InputLeftElement>
+              <Input
+                placeholder="Filter by City..."
+                value={cityFilter}
+                onChange={(e) => setCityFilter(e.target.value)}
+                variant="filled"
+                disabled={isLoading}
+                borderColor="gray.200"
+                borderRadius="xl"
+                bg="gray.50"
+              />
+            </InputGroup>
           </motion.div>
         </HStack>
       </VStack>

@@ -12,7 +12,7 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { Select } from "chakra-react-select";
-import { IoSearch, IoTimeOutline } from "react-icons/io5";
+import { IoSearch, IoTimeOutline, IoFilter } from "react-icons/io5";
 
 // This component now receives a lot of props to manage the controlled inputs
 interface SearchControlsProps {
@@ -130,16 +130,21 @@ export const SearchControls: React.FC<SearchControlsProps> = ({
       )}
     </Box>
     <HStack width="100%" spacing={4}>
-      <Input
-        placeholder="Filter by City..."
-        value={cityQuery}
-        onChange={(e) => setCityQuery(e.target.value)}
-        h="12"
-        bg="gray.50"
-        border="2px solid"
-        borderColor="gray.200"
-        borderRadius="xl"
-      />
+      <InputGroup size="lg">
+        <InputLeftElement>
+          <Icon as={IoFilter as any} />
+        </InputLeftElement>
+        <Input
+          placeholder="Filter by City..."
+          value={cityQuery}
+          onChange={(e) => setCityQuery(e.target.value)}
+          h="12"
+          bg="gray.50"
+          border="2px solid"
+          borderColor="gray.200"
+          borderRadius="xl"
+        />
+      </InputGroup>
       <Select
         name="state-select"
         options={stateOptions}
