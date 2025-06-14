@@ -52,9 +52,7 @@ export const SchoolCard: React.FC<SchoolCardProps> = ({ school, onClick }) => {
   };
 
   return (
-    // The entire card is clickable to trigger the view flip in the parent component.
     <VStack
-      onClick={onClick}
       position="relative"
       spacing={3}
       p={5}
@@ -109,35 +107,35 @@ export const SchoolCard: React.FC<SchoolCardProps> = ({ school, onClick }) => {
         </Text>
       </VStack>
       <Divider />
-      <Flex justify="space-between" align="center">
-        {/* This is our new button for marking as reviewed */}
+      <VStack spacing={2} width="100%">
         <Button
           size="sm"
           variant={isReviewed ? "solid" : "outline"}
           colorScheme="green"
           leftIcon={<Icon as={IoCheckmarkDone as any} />}
           onClick={handleReviewedClick}
+          width="100%"
           _focus={{
             outline: "none",
             boxShadow: "none",
           }}
         >
-          {isReviewed ? "Reviewed" : "Mark as viewed"}
+          {isReviewed ? "Viewed" : "Mark as viewed"}
         </Button>
         <Button
-          as="span"
+          onClick={onClick}
           variant="outline"
           size="sm"
           colorScheme="blue"
-          pointerEvents="none"
+          width="100%"
           _focus={{
             outline: "none",
             boxShadow: "none",
           }}
         >
-          Click for details
+          View Details
         </Button>
-      </Flex>
+      </VStack>
     </VStack>
   );
 };
