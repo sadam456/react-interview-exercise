@@ -7,7 +7,7 @@ import {
   Icon,
   Button,
   IconButton,
-  Flex,
+  Checkbox,
 } from "@chakra-ui/react";
 import { NCESSchoolFeatureAttributes } from "@utils/nces";
 import {
@@ -22,9 +22,16 @@ import { useReviewedItems } from "src/context/ReviewedItemsContext";
 interface SchoolCardProps {
   school: NCESSchoolFeatureAttributes;
   onClick: () => void;
+  isCompareSelected: boolean;
+  onCompareToggle: (schoolId: string) => void;
 }
 
-export const SchoolCard: React.FC<SchoolCardProps> = ({ school, onClick }) => {
+export const SchoolCard: React.FC<SchoolCardProps> = ({
+  school,
+  onClick,
+  isCompareSelected,
+  onCompareToggle,
+}) => {
   // --- STATE AND CONTEXT HOOKS ---
   // Fetches favorites context to manage this school's saved state/Reviewed state.
   const { isSchoolSaved, addSchool, removeSchool } = useFavorites();
@@ -91,6 +98,17 @@ export const SchoolCard: React.FC<SchoolCardProps> = ({ school, onClick }) => {
           outline: "none",
           boxShadow: "none",
         }}
+      />
+      <Checkbox
+        isChecked={isCompareSelected}
+        onChange={() => onCompareToggle(school.NCESSCH as string)}
+        position="absolute"
+        top="8px"
+        left="8px"
+        colorScheme="blue"
+        size="lg"
+        // Stop the click from triggering the card's main onClick
+        onClick={(e) => e.stopPropagation()}
       />
       {/* Main content section with school icon, name, and location. */}
       <Icon

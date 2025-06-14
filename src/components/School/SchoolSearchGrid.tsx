@@ -13,6 +13,7 @@ import {
   HStack,
   Icon,
   Flex,
+  Button,
 } from "@chakra-ui/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { IoSearch, IoSchoolOutline, IoFilter } from "react-icons/io5";
@@ -30,6 +31,9 @@ interface SchoolSearchGridProps {
   isLoading: boolean;
   filteredSchools: NCESSchoolFeatureAttributes[];
   onSchoolSelect: (school: NCESSchoolFeatureAttributes) => void;
+  comparisonList: string[];
+  onCompareToggle: (schoolId: string) => void;
+  onOpenCompare: () => void;
 }
 
 export const SchoolSearchGrid: React.FC<SchoolSearchGridProps> = ({
@@ -42,6 +46,9 @@ export const SchoolSearchGrid: React.FC<SchoolSearchGridProps> = ({
   isLoading,
   filteredSchools,
   onSchoolSelect,
+  comparisonList,
+  onCompareToggle,
+  onOpenCompare,
 }) => {
   return (
     <VStack
@@ -107,6 +114,18 @@ export const SchoolSearchGrid: React.FC<SchoolSearchGridProps> = ({
           </motion.div>
         </HStack>
       </VStack>
+      <Box width="100%" px={1}>
+        <Button
+          width="100%"
+          colorScheme="blue"
+          onClick={onOpenCompare}
+          // Disable button if fewer than 2 schools are selected
+          isDisabled={comparisonList.length < 2}
+          variant="solid"
+        >
+          Compare ({comparisonList.length}) Selected Schools
+        </Button>
+      </Box>
 
       <Box flex={1} overflowY="auto" display="flex" flexDirection="column">
         <AnimatePresence>
@@ -155,8 +174,14 @@ export const SchoolSearchGrid: React.FC<SchoolSearchGridProps> = ({
                     whileHover={{ y: -5 }}
                   >
                     <SchoolCard
+                      key={school.NCESSCH}
                       school={school}
                       onClick={() => onSchoolSelect(school)}
+                      // Pass down the new props
+                      isCompareSelected={comparisonList.includes(
+                        school.NCESSCH as string
+                      )}
+                      onCompareToggle={onCompareToggle}
                     />
                   </motion.div>
                 ))}

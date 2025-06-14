@@ -10,6 +10,7 @@ import {
   useToast,
   Icon,
   Container,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -27,6 +28,7 @@ import {
 import { SchoolSearchGrid } from "./SchoolSearchGrid";
 import { SchoolDetailPanel } from "./SchoolDetailPanel";
 import { DistrictSidebar } from "./DistrictSidebar";
+import { ComparisonModal } from "./ComparisonModal";
 
 export const SchoolView: React.FC = () => {
   // --- STATE AND HOOKS MANAGEMENT ---
@@ -42,9 +44,25 @@ export const SchoolView: React.FC = () => {
   const [selectedSchool, setSelectedSchool] =
     useState<NCESSchoolFeatureAttributes | null>(null);
   const [searchFocused, setSearchFocused] = useState(false);
+  // A list of school IDs to compare
+  const [comparisonList, setComparisonList] = useState<string[]>([]);
+  // Chakra's hook for easily managing modal open/close state
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
 
   const district = location.state?.district as NCESDistrictFeatureAttributes;
+  // Find the schools objects that match the IDs in our comparison list
+  const handleComparisonToggle = (schoolId: string) => {
+    setComparisonList((prevList) =>
+      prevList.includes(schoolId)
+        ? prevList.filter((id) => id !== schoolId)
+        : [...prevList, schoolId]
+    );
+  };
+
+  const schoolsToCompare = schools.filter((school) =>
+    comparisonList.includes(school.NCESSCH as string)
+  );
   const onBack = () => navigate(-1);
 
   useEffect(() => {
@@ -168,6 +186,9 @@ export const SchoolView: React.FC = () => {
                     isLoading={isLoading}
                     filteredSchools={filteredSchools}
                     onSchoolSelect={setSelectedSchool}
+                    comparisonList={comparisonList}
+                    onCompareToggle={handleComparisonToggle}
+                    onOpenCompare={onOpen}
                   />
 
                   {selectedSchool && (
@@ -181,6 +202,11 @@ export const SchoolView: React.FC = () => {
             </GridItem>
           </Grid>
         </motion.div>
+        <ComparisonModal
+          isOpen={isOpen}
+          onClose={onClose}
+          schoolsToCompare={schoolsToCompare}
+        />
       </Container>
     </Box>
   );
